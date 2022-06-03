@@ -13,5 +13,5 @@
     ?>
 
     <div class="apwb-errors"></div>
-    <div class="apwb-spinner"></div>
+    <div class="apwb-loader"></div>
 </div>
