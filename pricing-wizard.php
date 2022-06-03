@@ -39,6 +39,17 @@ define('APWB_DIR_URL', plugin_dir_url( __FILE__ ));
 define('APWB_VIEWS_PATH', APWB_DIR_PATH . 'views');
 define('APWB_STEPS_PATH', APWB_DIR_PATH . 'views/steps');
 
+
+/** 
+ * The admin settings of the plugin.
+ * 
+ * @since	1.0.0
+ */
+function load_dependancies() {
+    require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-apwb-admin.php';
+}
+add_action( 'plugins_loaded', 'load_dependancies' );
+
 /** 
  * Ideal Postcodes API lookup.
  * 

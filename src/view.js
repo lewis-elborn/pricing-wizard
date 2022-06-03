@@ -71,9 +71,9 @@ class MultiStep {
                         });
                         
                         idealPostcodes.lookupAddress({
-                            query: "ID1 1QD",  	// required
-                            limit: 10,			// optional
-                            page: 0 			// optional
+                            query: this.postcode.value,
+                            limit: 1,
+                            page: 0
                         }, function (error, searchResults) {
                             if (error) {
                                 // Implement some error handling
@@ -81,8 +81,10 @@ class MultiStep {
                             console.log(searchResults); 	
                         });
 
+                    } else {
+                        // Show the error message.
+                        this.errorHandler( 'Please enter a valid postcode.' );
                     }
-
                     break;
                     // Else, continue to the next step.
                     default:
@@ -146,8 +148,7 @@ class MultiStep {
         this.errors.innerHTML = '';
     }
   
-  }
+}
   
-  // Usage:
-  let MultiStep = new MultiStep();
-  MultiStep;
+// Usage:
+new MultiStep();
