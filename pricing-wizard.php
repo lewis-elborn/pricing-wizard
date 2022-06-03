@@ -81,6 +81,12 @@ add_action( 'wp_ajax_nopriv_ppw_api_lookup', 'apwb_ideal_postcode_lookup' );
  * @since	1.0.0
  */
 function apwb_dynamic_register_block() {
+
+    // Only load if Gutenberg is available.
+    if ( !function_exists( 'register_block_type' ) ) {
+        return;
+    }
+
     // automatically load dependencies and version
     $asset_file = include( APWB_DIR_PATH . 'build/index.asset.php');
     $view_asset_file = include( APWB_DIR_PATH . 'build/view.asset.php');
