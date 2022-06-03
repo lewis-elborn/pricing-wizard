@@ -105,7 +105,7 @@ function apwb_dynamic_register_block() {
         $view_asset_file['version']
     );
  
-    register_block_type( __DIR__, array(
+    register_block_type( __DIR__ . '/build', array(
         'api_version' => 2,
         'editor_script' => 'apwb-dynamic-js',
         'render_callback' => 'apwb_dynamic_render_callback'
