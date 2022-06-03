@@ -1,6 +1,6 @@
-<div class="pw-step" data-step="<?php echo esc_attr($args['id']); ?>">
-    <div class="pw-step__inner">
-        <p class="pw-step__title">Before each lesson you must:</p>
+<div class="apwb-step" data-step="<?php echo esc_attr($args['id']); ?>">
+    <div class="apwb-step__inner">
+        <p class="apwb-step__title">Before each lesson you must:</p>
         <p>
             <strong>Be Symptom-Free</strong><br>
             <strong>Wash YouR Hands</strong><br>
@@ -12,8 +12,8 @@
         <p>Find more detailed information about our <a href="#">Covid-19 Safety Policy</a>.</p>
     </div>
 
-    <div class="pw-buttons">
-        <button class="pw-button" data-direction="previous">Go Back</button>
-        <button class="pw-button" data-direction="next">Continue</button>
+    <div class="apwb-btns">
+        <button class="apwb-btn" data-direction="previous">Go Back</button>
+        <button class="apwb-btn" data-direction="next">Continue</button>
     </div>
 </div>
