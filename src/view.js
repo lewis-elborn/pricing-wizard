@@ -1,120 +1,153 @@
-const $ = jQuery;
+import { AddressFinder } from "@ideal-postcodes/postcode-lookup";
+import { isValid } from "postcode";
 
-class MultistepForm {
+class MultiStep {
+
+    // ...
     constructor() {
-        this.steps = $('.pw-step');
-        this.buttons = $('.pw-button');
-        this.inputs = $('.pw-container').find(':input');
-        this.columns = $('.pw-column');
-        this.contactForm = $('.wpcf7');
-        this.spinner = $('.pw-spinner');
-        this.errors = $('.pw-errors');
-
+        this.steps = document.getElementsByClassName('.apwb-step');
+        this.postcode = document.getElementsByClassName('.apwb-postcode');
+        this.btns = document.getElementsByClassName('.apwb-btn');
+        this.columns = document.getElementsByClassName('.apwb-column');
+        this.wpcf7 = document.getElementsByClassName('.wpcf7');
+        this.loader = document.getElementsByClassName('.apwb-loader');
+        this.errors = document.getElementsByClassName('.apwb-errors');
         this.bindEvents();
     }
-
+  
+    // ...
     bindEvents() {
-        this.buttons.on('click', eventObject => this.handleStepChange(eventObject));
+        // Listen for step change, if > then process @stepChangeHandler.
+        this.addEventListener( 'click', this.stepChangeHandler( e ) );
 
-        this.inputs.on('keyup change', eventObject => this.updateContactFormInputValues(eventObject));
-        
-        this.contactForm.on('wpcf7submit', () => {
-            this.changeStep(6);
-        });
+        // Listen for input values, if > then process @updateValues.
+        this.addEventListener( 'keyup', this.updateValues( e ) );
+
+        // Listen for contact form 7 submission.
+        this.addEventListener( 'wpcf7submit', function( e ) {
+            // If contact form 7 is fired, move to final step.
+            this.stepChange( 6 );
+        }, false );
     }
 
-    handleStepChange(eventObject) {
-        const button = $(eventObject.target);
-        const direction = button.data('direction');
-        const stepContainer = button.closest('.pw-step')
-        const currentStep = stepContainer.data('step');
-        const ajaxAction = stepContainer.data('ajax-action');
-        const nextStep = direction === 'next' ? currentStep+1 : currentStep-1;
+    // ...
+    stepChangeHandler(e) {
+        // Get the button that triggered the event.
+        const btn = e.target;
 
-        if(!direction) {
-            return;
-        }
+        // Get the button's data-dir attribute.
+        const dir = btn.getAttribute( 'data-dir' );
 
-        this.spinner.show();
+        // Get the '.apwb-step' div closest to the button.
+        const step = btn.closest( '.apwb-step' );
 
-        switch(ajaxAction) {
-            case 'verifyPostcode':
-                this.verifyPostcode(stepContainer, (response) => {
-                    if(response.success) {
-                        this.changeHourlyPrices(response.prices);
-                        this.changeStep(nextStep);
-                    } else {
-                        this.addError('Postcode is not valid.');
+        // Get the '.apwb-step' div's data-curStep attribute.
+        const curStep = step.getAttribute( 'data-curStep' );
+
+        // Get the '.apwb-step' div's data-xhrAction attribute.
+        const xhrAction = step.getAttribute( 'data-xhrAction' );
+
+        // Calculate the next step, based on the button's data-dir attribute.
+        const nextStep = dir === 'next' ? parseInt( curStep ) + 1 : parseInt( curStep ) - 1;
+
+        // If the next step is valid, move to the next step.
+        if ( this.validateStep( nextStep ) ) {
+
+            // Show the ui loader.
+            this.loader.classList.add( 'apwb-loader--active' );
+
+            switch ( xhrAction ) {
+                // If the next step requires postcode lookup, do the lookup.
+                case 'verifyPostcode':
+                    // Check API response here...
+                    if (isValid(this.postcode.value)) {
+
+                        const controller = AddressFinder.setup({
+                            apiKey: "iddqd",
+                            outputFields: {
+                                post_town: "#post_town",
+                                postcode: "#postcode",
+                            }
+                        });
+                        
+                        idealPostcodes.lookupAddress({
+                            query: "ID1 1QD",  	// required
+                            limit: 10,			// optional
+                            page: 0 			// optional
+                        }, function (error, searchResults) {
+                            if (error) {
+                                // Implement some error handling
+                            } 
+                            console.log(searchResults); 	
+                        });
+
                     }
-                });
-                break;
-            default:
-                this.changeStep(nextStep);
-                break;
-        }
-    }
 
-    updateContactFormInputValues(eventObject) {
-        const input = $(eventObject.target);
-        const contactFormName = input.data('cf-name');
-
-        if(contactFormName) {
-            const contactFormInput = $('.pw-container').find(`[name="${contactFormName}"]`);
-            contactFormInput.val(input.val());
-        }
-    }
-
-    changeStep(stepIndex) {
-        this.clearErrors();
-        this.spinner.hide();
-        this.steps.hide();
-
-        this.steps.each((index, element) => {
-            const step = $(element);
-            index !== stepIndex ? step.hide() : step.show();
-        });
-    }
-
-    changeHourlyPrices(prices) {
-        this.columns.each((index, element) => {
-            $(element).find('.pw-column__price').text(prices[index]);
-            $(element).find('.pw-column__price').text(prices[index]);
-            $(element).find('input').val(prices[index]);
-        });
-    }
-
-    addError(error) {
-        this.spinner.hide();
-        this.errors.show();
-        this.errors.append(`<p>${error}</p>`);
-    }
-
-    clearErrors() {
-        this.errors.hide();
-        this.errors.empty();
-    }
-
-    verifyPostcode(step, callback) {
-        const postcode = step.find('[id="postCode"]').val();
-
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            url: data.ajax_url,
-            data: {
-                action: 'apwb_ideal_postcode_lookup',
-                postcode,
-            },
-            success: response => {
-                callback(response);
-            },
-            error: response => {
-                callback(response);
+                    break;
+                    // Else, continue to the next step.
+                    default:
+                        this.stepChange( nextStep );
             }
-        });
-    }
-}
 
-$(() => {
-    new MultistepForm();
-});
+        }
+    }
+
+    // ...
+    updateValues(e) {
+        // Get the input that triggered the event.
+        const input = e.target;
+        // add the postcode to the wpcf7 postcode input.
+    }
+
+    // ...
+    stepChange(stepIndex) {
+        // Hide the ui loader.
+        this.loader.classList.remove( 'apwb-loader--active' );
+        // Hide the error message.
+        this.clearErrors();
+        // Set the current step visibility.
+        this.steps.classList.remove( 'apwb-step--active' );
+
+        // Set the step visibility.
+        this.steps.forEach( (step, index) => {
+            // Hide all steps.
+            step.classList.remove( 'apwb-step--active' );
+            // If the stepIndex is equal to the current step, show the current step.
+            if ( index === stepIndex ) {
+                step.classList.add( 'apwb-step--active' );
+            }
+        } );
+
+    }
+
+    // ...
+    updatePricing(prices) {
+        // Set the pricing.
+        this.columns.forEach( (prices, index) => {
+            // do somthing...
+        } );
+    }
+
+    // ...
+    errorHandler(error) {
+        // Hide the ui loader.
+        this.loader.classList.remove( 'apwb-loader--active' );
+        // Show the error message.
+        this.errors.classList.add( 'apwb-errors--active' );
+        // Set the error message.
+        this.errors.innerHTML = error;
+    }
+
+    // ...
+    clearErrors() {
+        // Hide the error message.
+        this.errors.classList.remove( 'apwb-errors--active' );
+        // Clear the error message.
+        this.errors.innerHTML = '';
+    }
+  
+  }
+  
+  // Usage:
+  let MultiStep = new MultiStep();
+  MultiStep;
